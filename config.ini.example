@@ -1,0 +1,25 @@
+# STEM Configuration Example
+#
+# Copy this file to config.ini and customize for your environment.
+# config.ini is git-ignored for local overrides.
+
+[zmq]
+# IP address or hostname of machine running fake_data DAQ
+# For local development: localhost
+# For LAN: 192.168.x.x or actual hostname
+daq_host = localhost
+
+# ZMQ SUB port (receive data from fake_data)
+sub_port = 5555
+
+# ZMQ PUB port (send control commands to fake_data)
+pub_port = 5556
+
+[web]
+# FastAPI server binding
+# 0.0.0.0 listens on all interfaces (accessible from network)
+# 127.0.0.1 listens only on localhost
+host = 0.0.0.0
+
+# Web server port
+port = 8000
