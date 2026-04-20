@@ -12,6 +12,7 @@ Endpoints:
 """
 
 import asyncio
+import configparser
 import datetime
 import io
 import json
@@ -36,8 +37,39 @@ from starlette.responses import JSONResponse
 # Configuration
 # ---------------------------------------------------------------------------
 
-ZMQ_SUB_PORT = 5555    # receive data from fake_daq
-ZMQ_PUB_PORT = 5556    # send control to fake_daq
+def _load_config():
+    """Load ZMQ and web configuration from config.ini."""
+    config_path = Path(__file__).parent / 'config.ini'
+    config = configparser.ConfigParser()
+
+    if not config_path.exists():
+        print(f'[app] WARNING: {config_path} not found, using defaults')
+        return {
+            'zmq_host': 'localhost',
+            'zmq_sub_port': 5555,
+            'zmq_pub_port': 5556,
+            'web_host': '0.0.0.0',
+            'web_port': 8000,
+        }
+
+    config.read(config_path)
+
+    return {
+        'zmq_host': config.get('zmq', 'daq_host', fallback='localhost'),
+        'zmq_sub_port': config.getint('zmq', 'sub_port', fallback=5555),
+        'zmq_pub_port': config.getint('zmq', 'pub_port', fallback=5556),
+        'web_host': config.get('web', 'host', fallback='0.0.0.0'),
+        'web_port': config.getint('web', 'port', fallback=8000),
+    }
+
+_CONFIG = _load_config()
+
+ZMQ_HOST = _CONFIG['zmq_host']
+ZMQ_SUB_PORT = _CONFIG['zmq_sub_port']    # receive data from fake_data
+ZMQ_PUB_PORT = _CONFIG['zmq_pub_port']    # send control to fake_data
+WEB_HOST = _CONFIG['web_host']
+WEB_PORT = _CONFIG['web_port']
+
 _downsample_pts = 4000    # max points per channel sent to browser (updated dynamically)
 _TARGET_IN_VIEW  = 2000   # desired visible points when zoomed
 _MIN_PTS         = 2000
@@ -189,11 +221,11 @@ def _finalize_save(frames, job, token):
 def _zmq_subscriber_thread(loop: asyncio.AbstractEventLoop):
     """Background thread: receive ZMQ frames, push to asyncio queue."""
     sub = _zmq_ctx.socket(zmq.SUB)
-    sub.connect(f'tcp://localhost:{ZMQ_SUB_PORT}')
+    sub.connect(f'tcp://{ZMQ_HOST}:{ZMQ_SUB_PORT}')
     sub.setsockopt_string(zmq.SUBSCRIBE, '')
     sub.setsockopt(zmq.RCVTIMEO, 2000)   # 2s timeout so thread can exit cleanly
 
-    print(f'[app] ZMQ SUB connected to tcp://localhost:{ZMQ_SUB_PORT}')
+    print(f'[app] ZMQ SUB connected to tcp://{ZMQ_HOST}:{ZMQ_SUB_PORT}')
 
     # rate tracking
     t_prev   = time.monotonic()
@@ -317,16 +349,16 @@ async def _put_nowait_drop(queue: asyncio.Queue, item):
 async def startup():
     global _zmq_pub
 
-    # ZMQ PUB for sending control to fake_daq
+    # ZMQ PUB for sending control to fake_data
     _zmq_pub = _zmq_ctx.socket(zmq.PUB)
-    _zmq_pub.connect(f'tcp://localhost:{ZMQ_PUB_PORT}')
-    print(f'[app] ZMQ PUB connected to tcp://localhost:{ZMQ_PUB_PORT}')
+    _zmq_pub.connect(f'tcp://{ZMQ_HOST}:{ZMQ_PUB_PORT}')
+    print(f'[app] ZMQ PUB connected to tcp://{ZMQ_HOST}:{ZMQ_PUB_PORT}')
 
     # start ZMQ subscriber in background thread
     loop = asyncio.get_event_loop()
     t = threading.Thread(target=_zmq_subscriber_thread, args=(loop,), daemon=True)
     t.start()
-    print('[app] waveforge web monitor started — http://localhost:8000')
+    print(f'[app] STEM web monitor started — http://{WEB_HOST}:{WEB_PORT}')
 
 
 @app.on_event('shutdown')
