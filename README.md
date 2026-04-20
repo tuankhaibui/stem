@@ -4,7 +4,7 @@
 
 A FastAPI-based web server that provides real-time visualization, analysis, and data export for multi-channel waveform data streaming from a ZMQ-enabled DAQ system. Originally designed to monitor physics detector experiments (LOTUS), STEM bridges the gap between raw data acquisition hardware and interactive browser-based analysis.
 
-![STEM Monitor Demo](../waveforge/assets/monitor_demo_with_fake-daq.gif)
+![STEM Monitor Demo](assets/monitor_demo_with_fake-daq.gif)
 
 ---
 
