@@ -12,7 +12,7 @@ A FastAPI-based web server that provides real-time visualization, analysis, and 
 
 STEM is a **data bridge + web UI** that:
 
-1. **Subscribes to ZMQ data stream** from upstream DAQ (fake_data or real hardware)
+1. **Subscribes to ZMQ data stream** from upstream DAQ (daq_phantom or real hardware)
    - Listens on configurable ZMQ SUB socket (default: `tcp://localhost:5555`)
    - Receives multipart messages: `[metadata JSON, waveform binary]`
    - Handles up to 8+ channels at 1+ MHz sampling rate
@@ -42,7 +42,7 @@ STEM is a **data bridge + web UI** that:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ Upstream DAQ System (fake_data or real hardware)            │
+│ Upstream DAQ System (daq_phantom or real hardware)            │
 │ - 8 channels @ 1 MHz (8 MB/sec raw)                         │
 │ - Publishes ZMQ on tcp://0.0.0.0:5555                       │
 │   Frame: [metadata JSON, waveform numpy array (float64)]    │
@@ -210,7 +210,7 @@ cp config.ini.example config.ini
 ```
 
 **Key configuration options:**
-- `[zmq] daq_host` — IP address or hostname of the machine running fake_data
+- `[zmq] daq_host` — IP address or hostname of the machine running daq_phantom
 - `[zmq] sub_port` — Port for receiving data from DAQ (default: 5555)
 - `[zmq] pub_port` — Port for sending control commands to DAQ (default: 5556)
 - `[web] host` — Web server binding (0.0.0.0 = all interfaces, 127.0.0.1 = localhost only)
@@ -419,5 +419,5 @@ Browser: FFT plot shows zeros or no data
 
 ## Related Projects
 
-- **fake_data:** Standalone ZMQ publisher (simulates DAQ or real hardware)
+- **daq_phantom:** Standalone ZMQ publisher (simulates DAQ or real hardware)
 - **LOTUSS Collaboration:** Physics detector experiment
