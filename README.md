@@ -2,7 +2,7 @@
 
 **STEM** = **S**ignals **T**ransport, **E**xport, **M**onitor
 
-A FastAPI-based web server that provides real-time visualization, analysis, and data export for multi-channel waveform data streaming from a ZMQ-enabled DAQ system. Originally designed to monitor physics detector experiments (LOTUS), STEM bridges the gap between raw data acquisition hardware and interactive browser-based analysis.
+A FastAPI-based web server that provides real-time visualization, analysis, and data export for multi-channel waveform data streaming from a ZMQ-enabled DAQ system. Originally designed to monitor physics detector experiments (LOTUSS), STEM bridges the gap between raw data acquisition hardware and interactive browser-based analysis.
 
 ![STEM Monitor Demo](assets/monitor_demo_with_fake-daq.gif)
 
@@ -398,4 +398,4 @@ Browser: FFT plot shows zeros or no data
 ## Related Projects
 
 - **fake_data:** Standalone ZMQ publisher (simulates DAQ or real hardware)
-- **LOTUS Collaboration:** Physics detector experiment
+- **LOTUSS Collaboration:** Physics detector experiment
