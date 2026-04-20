@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DARKWAVE — DAQ Monitor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────── -->
+<header>
+    <h1 id="site-title">DARK<span>WAVE</span></h1>
+    <div id="status-bar">
+        <div id="conn-indicator"></div>
+        <span id="conn-text">Disconnected</span>
+        <span id="ev-rate"><b>—</b> ev/s</span>
+        <span id="latency">latency <b>—</b></span>
+        <span id="sample-rate"><b>—</b> MS/s</span>
+        <span id="trace-len"><b>—</b> ms trace</span>
+        <button id="btn-theme" title="Toggle light/dark theme">☀</button>
+    </div>
+</header>
+
+<!-- ── Main ───────────────────────────────────────────── -->
+<main>
+
+    <!-- ── Sidebar ──────────────────────────────────── -->
+    <aside>
+
+        <!-- ── Trigger ──────────────────────────────── -->
+        <div class="acc-section" id="acc-trigger">
+            <button class="acc-header">
+                <span class="acc-title">Trigger</span>
+                <span class="acc-arrow">▶</span>
+            </button>
+            <div class="acc-body">
+                <div class="acc-inner">
+                    <div class="trigger-controls">
+                        <div class="trig-row-top">
+                            <button id="trig-enable">Off</button>
+                            <select id="trig-source"></select>
+                        </div>
+                        <div class="trig-edge-btns">
+                            <button id="trig-rise" class="active" title="Rising edge">↑ Rise</button>
+                            <button id="trig-fall"                title="Falling edge">↓ Fall</button>
+                        </div>
+                        <div class="trig-level-row">
+                            <label>Level</label>
+                            <div class="range-num">
+                                <input type="range"  id="trig-level"     min="-2" max="2" step="0.01" value="0">
+                                <input type="number" id="trig-level-num" min="-2" max="2" step="0.01" value="0.00">
+                            </div>
+                        </div>
+                        <div class="trig-hyst-row">
+                            <label>Hysteresis</label>
+                            <div class="range-num">
+                                <input type="range"  id="trig-hyst"     min="0" max="0.5" step="0.005" value="0.05">
+                                <input type="number" id="trig-hyst-num" min="0" max="0.5" step="0.005" value="0.05">
+                            </div>
+                        </div>
+                        <div class="trig-mode-btns">
+                            <button id="trig-auto"   class="active">Auto</button>
+                            <button id="trig-normal">Normal</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Waveform ─────────────────────────────── -->
+        <div class="acc-section" id="acc-wave">
+            <button class="acc-header">
+                <span class="acc-title">Waveform</span>
+                <span class="acc-arrow">▶</span>
+            </button>
+            <div class="acc-body">
+                <div class="acc-inner">
+                    <div class="ctrl-group">
+                        <!-- Style select + Stack on same row, no label needed -->
+                        <div class="ctrl-row">
+                            <select id="sel-style" class="toolbar-select" style="flex:1">
+                                <option value="0" selected>── Lines</option>
+                                <option value="1">·· Dots</option>
+                                <option value="2">─· Lines+Dots</option>
+                            </select>
+                            <button id="btn-stack" title="Stack channels on separate axes">Stack</button>
+                        </div>
+
+                        <div class="ctrl-separator"></div>
+
+                        <!-- Mode toggle: full-width btn-group -->
+                        <div class="btn-group" id="mode-group">
+                            <button id="btn-mode-off" class="active">Off</button>
+                            <button id="btn-mode-persist">Persist</button>
+                            <button id="btn-mode-avg">Avg</button>
+                        </div>
+
+                        <!-- N + progress (hidden when Off) -->
+                        <div class="ctrl-row" id="mode-n-row" hidden>
+                            <span class="ctrl-label">N</span>
+                            <input type="number" id="mode-n" value="10" min="2" max="1000"
+                                   class="avg-n-input" title="Frames for persist/avg">
+                            <span id="mode-progress" class="avg-count">0/10</span>
+                        </div>
+
+                        <!-- Channel picker (hidden when Off) -->
+                        <div id="mode-ch-row" hidden>
+                            <div class="ctrl-label" style="margin-bottom:4px">Channels</div>
+                            <div id="mode-ch-picker"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── FFT ──────────────────────────────────── -->
+        <div class="acc-section" id="acc-fft">
+            <button class="acc-header">
+                <span class="acc-title">FFT</span>
+                <span class="acc-arrow">▶</span>
+            </button>
+            <div class="acc-body">
+                <div class="acc-inner">
+                    <div class="ctrl-group">
+                        <!-- Show + Unit on same row -->
+                        <div class="ctrl-row">
+                            <button id="btn-fft" class="acc-show-btn" title="Toggle FFT spectrum panel">Show</button>
+                            <select id="sel-fft-unit" class="toolbar-select" style="flex:1">
+                                <option value="0">V²/Hz</option>
+                                <option value="1">V/√Hz</option>
+                                <option value="2" selected>dBV/√Hz</option>
+                            </select>
+                        </div>
+                        <!-- Log + Avg on one row -->
+                        <div class="ctrl-row ctrl-nowrap">
+                            <span class="ctrl-label">Log</span>
+                            <div class="btn-group" id="fft-log-group">
+                                <button id="btn-fft-log-x" class="active" title="Toggle X log scale">X</button>
+                                <button id="btn-fft-log-y"               title="Toggle Y log scale">Y</button>
+                            </div>
+                            <span class="ctrl-label" style="margin-left:auto">Avg</span>
+                            <input type="number" id="fft-avg-n" class="avg-n-input avg-n-sm"
+                                   value="1" min="1" max="10000" title="FFT frames to average">
+                            <button id="btn-fft-avg-reset" class="avg-reset-btn" title="Reset FFT average">↺</button>
+                            <span id="fft-n-avg" class="avg-count">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Measure ──────────────────────────────── -->
+        <div class="acc-section" id="acc-meas">
+            <button class="acc-header">
+                <span class="acc-title">Measure</span>
+                <span class="acc-arrow">▶</span>
+            </button>
+            <div class="acc-body">
+                <div class="acc-inner">
+                    <div class="ctrl-group">
+                        <!-- Show + Avg on same row, no wrap -->
+                        <div class="ctrl-row ctrl-nowrap">
+                            <button id="btn-measure" class="acc-show-btn" title="Toggle measurements table">Show</button>
+                            <span class="ctrl-label">Avg</span>
+                            <input type="number" id="stats-avg-n" class="avg-n-input"
+                                   value="1" min="1" max="10000" title="Stats frames to average">
+                            <button id="btn-stats-avg-reset" class="avg-reset-btn" title="Reset stats average">↺</button>
+                            <span id="stats-n-avg" class="avg-count">0</span>
+                        </div>
+                        <div id="stats-config-sidebar"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Save Data ────────────────────────────── -->
+        <div class="acc-section" id="acc-save">
+            <button class="acc-header">
+                <span class="acc-title">Save Data</span>
+                <span class="acc-arrow">▶</span>
+            </button>
+            <div class="acc-body">
+                <div class="acc-inner">
+                    <div class="ctrl-group">
+                        <!-- Format + Events -->
+                        <div class="ctrl-row">
+                            <select id="save-format" class="toolbar-select">
+                                <option value="hdf5">HDF5</option>
+                                <option value="csv">CSV</option>
+                            </select>
+                            <span class="ctrl-label">Events</span>
+                            <input type="number" id="save-n-events" class="avg-n-input"
+                                   value="1" min="1" max="10000" title="Number of events to save">
+                        </div>
+                        <!-- What to save -->
+                        <div class="ctrl-row">
+                            <label class="save-check-item">
+                                <input type="checkbox" id="save-waveform" checked>
+                                <span>Waveform</span>
+                            </label>
+                            <label class="save-check-item">
+                                <input type="checkbox" id="save-fft">
+                                <span>FFT</span>
+                            </label>
+                        </div>
+                        <!-- Prefix -->
+                        <div class="ctrl-row">
+                            <span class="ctrl-label">Prefix</span>
+                            <input type="text" id="save-prefix" class="save-prefix-input"
+                                   placeholder="optional" maxlength="40">
+                        </div>
+                        <!-- Suffix mode (can select both) -->
+                        <div class="ctrl-row save-suffix-row">
+                            <label class="save-check-item">
+                                <input type="checkbox" id="save-suffix-ts" checked>
+                                <span>Timestamp</span>
+                            </label>
+                            <label class="save-check-item">
+                                <input type="checkbox" id="save-suffix-num">
+                                <span>Number</span>
+                            </label>
+                        </div>
+                        <!-- Channel picker -->
+                        <div>
+                            <div class="ctrl-label" style="margin-bottom:4px">Channels</div>
+                            <div id="save-ch-picker"></div>
+                        </div>
+                        <!-- Save button -->
+                        <button id="btn-save" class="save-action-btn">Save</button>
+                        <!-- Progress (hidden while idle) -->
+                        <div id="save-progress-row" hidden>
+                            <div class="save-progress-bar">
+                                <div id="save-progress-fill"></div>
+                            </div>
+                            <div class="save-progress-foot">
+                                <span id="save-progress-text">0 / 1</span>
+                                <button id="btn-save-cancel" class="save-cancel-btn">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── DAQ Config ────────────────────────────── -->
+        <div class="acc-section" id="acc-daq">
+            <button class="acc-header">
+                <span class="acc-title">DAQ Config</span>
+                <span class="acc-arrow">▶</span>
+            </button>
+            <div class="acc-body">
+                <div class="acc-inner">
+
+                    <!-- Data source badge -->
+                    <div class="daq-source">
+                        <span class="daq-source-dot"></span>
+                        <span class="daq-source-name">FakeDAQ</span>
+                        <span class="daq-source-desc">Synthetic signal generator</span>
+                    </div>
+
+                    <!-- Connection controls -->
+                    <div class="global-controls" style="margin: 8px 0;">
+                        <button id="btn-connect" class="active">Connect</button>
+                        <button id="btn-pause">⏸ Pause</button>
+                        <button id="btn-all-on">All On</button>
+                        <button id="btn-all-off" class="danger">All Off</button>
+                    </div>
+
+                    <!-- Channel cards -->
+                    <div id="channel-list"></div>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- Sidebar ↔ plot-area drag handle -->
+    <div class="resize-handle resize-h" id="resize-sidebar"></div>
+
+    <!-- ── Plot area ──────────────────────────────────── -->
+    <div id="plot-area">
+
+        <!-- Zoom bar — X/Y zoom only -->
+        <div id="zoom-bar">
+            <div class="btn-group" id="zoom-group">
+                <span class="zoom-label">X</span>
+                <button id="btn-x-out" title="Zoom X out">−</button>
+                <button id="btn-x-in"  title="Zoom X in">+</button>
+                <span class="zoom-label">Y</span>
+                <button id="btn-y-out" title="Zoom Y out">−</button>
+                <button id="btn-y-in"  title="Zoom Y in">+</button>
+                <button id="btn-zoom-reset" title="Reset zoom">Reset</button>
+            </div>
+        </div>
+
+        <div id="plot">
+            <div id="zoom-warn" hidden>⚠ zoom exceeds trace length</div>
+        </div>
+
+        <!-- Plot ↔ FFT drag handle -->
+        <div class="resize-handle resize-v" id="resize-fft"></div>
+
+        <!-- FFT spectrum panel -->
+        <div id="fft-panel">
+            <div id="fft-zoom-bar">
+                <div class="btn-group" id="fft-zoom-group">
+                    <span class="zoom-label">X</span>
+                    <button id="btn-fft-x-out" title="X zoom out">−</button>
+                    <button id="btn-fft-x-in"  title="X zoom in">+</button>
+                    <span class="zoom-label">Y</span>
+                    <button id="btn-fft-y-out" title="Y zoom out">−</button>
+                    <button id="btn-fft-y-in"  title="Y zoom in">+</button>
+                    <button id="btn-fft-zoom-reset" title="Reset FFT axes">↺</button>
+                </div>
+            </div>
+            <div id="fft-plot"></div>
+        </div>
+
+        <!-- FFT ↔ stats drag handle -->
+        <div class="resize-handle resize-v" id="resize-stats"></div>
+
+        <!-- Measurements table -->
+        <div id="stats-panel">
+            <div id="stats-scroll">
+            <table id="stats-table">
+                <thead>
+                    <tr>
+                        <th rowspan="2" class="th-ch">Channel</th>
+                        <th colspan="6" class="th-group">Amplitude</th>
+                        <th colspan="5" class="th-group th-group-right">Time Domain</th>
+                    </tr>
+                    <tr>
+                        <th data-stat="min">Min <span class="th-unit">(V)</span></th>
+                        <th data-stat="max">Max <span class="th-unit">(V)</span></th>
+                        <th data-stat="vpp">Vpp <span class="th-unit">(V)</span></th>
+                        <th data-stat="mean">Mean <span class="th-unit">(V)</span></th>
+                        <th data-stat="rms">RMS <span class="th-unit">(V)</span></th>
+                        <th data-stat="std">Std <span class="th-unit">(V)</span></th>
+                        <th data-stat="freq">Freq <span class="th-unit">(Hz)</span></th>
+                        <th data-stat="period">Period <span class="th-unit">(ms)</span></th>
+                        <th data-stat="duty">Duty <span class="th-unit">(%)</span></th>
+                        <th data-stat="riseTime">Rise <span class="th-unit">(µs)</span></th>
+                        <th data-stat="fallTime">Fall <span class="th-unit">(µs)</span></th>
+                    </tr>
+                </thead>
+                <tbody id="stats-body"></tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+
+</main>
+
+<script src="/static/monitor.js"></script>
+</body>
+</html>

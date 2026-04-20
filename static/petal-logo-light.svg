@@ -1,0 +1,87 @@
+<svg width="580" height="110" viewBox="0 0 580 110" role="img" xmlns="http://www.w3.org/2000/svg">
+  <title>PETAL — Phonon and Electronics Triggering and Acquisition Layer</title>
+  <desc>PETAL DAQ system logo for LOTUSS Experiment at Kamioka — light background version</desc>
+
+  <!-- background circle -->
+  <circle cx="52" cy="55" r="42" fill="#D8F0E8" opacity="0.7"/>
+
+  <!-- 5 petals -->
+  <g transform="rotate(0,52,55)">
+    <path d="M52,55 C47,38 46,27 52,11 C58,27 57,38 52,55Z" fill="#0F6E56" opacity="0.88"/>
+    <path d="M52,55 C49.5,40 49,31 52,16 C55,31 54.5,40 52,55Z" fill="#1D9E75" opacity="0.55"/>
+  </g>
+  <g transform="rotate(72,52,55)">
+    <path d="M52,55 C47,38 46,27 52,11 C58,27 57,38 52,55Z" fill="#0F6E56" opacity="0.88"/>
+    <path d="M52,55 C49.5,40 49,31 52,16 C55,31 54.5,40 52,55Z" fill="#1D9E75" opacity="0.55"/>
+  </g>
+  <g transform="rotate(144,52,55)">
+    <path d="M52,55 C47,38 46,27 52,11 C58,27 57,38 52,55Z" fill="#0F6E56" opacity="0.88"/>
+    <path d="M52,55 C49.5,40 49,31 52,16 C55,31 54.5,40 52,55Z" fill="#1D9E75" opacity="0.55"/>
+  </g>
+  <g transform="rotate(216,52,55)">
+    <path d="M52,55 C47,38 46,27 52,11 C58,27 57,38 52,55Z" fill="#0F6E56" opacity="0.88"/>
+    <path d="M52,55 C49.5,40 49,31 52,16 C55,31 54.5,40 52,55Z" fill="#1D9E75" opacity="0.55"/>
+  </g>
+  <g transform="rotate(288,52,55)">
+    <path d="M52,55 C47,38 46,27 52,11 C58,27 57,38 52,55Z" fill="#0F6E56" opacity="0.88"/>
+    <path d="M52,55 C49.5,40 49,31 52,16 C55,31 54.5,40 52,55Z" fill="#1D9E75" opacity="0.55"/>
+  </g>
+
+  <!-- meander trace on top petal -->
+  <g opacity="0.5" stroke="#0F6E56" stroke-width="0.7" fill="none">
+    <path d="M50,36 L50,30 L54,30 L54,24 L50,24 L50,19"/>
+    <rect x="49" y="33" width="4" height="2.5" fill="#0F6E56" opacity="0.8"/>
+    <rect x="49" y="27" width="4" height="2.5" fill="#0F6E56" opacity="0.8"/>
+    <rect x="49" y="21" width="4" height="2.5" fill="#0F6E56" opacity="0.8"/>
+  </g>
+
+  <!-- rings -->
+  <circle cx="52" cy="55" r="19" stroke="#1D9E75" stroke-width="0.6" fill="none" opacity="0.45"/>
+  <circle cx="52" cy="55" r="27" stroke="#1D9E75" stroke-width="0.4" fill="none" opacity="0.22" stroke-dasharray="3 5"/>
+  <circle cx="52" cy="55" r="35" stroke="#1D9E75" stroke-width="0.3" fill="none" opacity="0.14" stroke-dasharray="2 8"/>
+
+  <!-- tick marks -->
+  <g stroke="#0F6E56" stroke-width="1.2" opacity="0.4">
+    <line x1="52" y1="18" x2="52" y2="13"/>
+    <line x1="52" y1="92" x2="52" y2="97"/>
+    <line x1="15"  y1="55" x2="10"  y2="55"/>
+    <line x1="89"  y1="55" x2="94"  y2="55"/>
+    <line x1="27"  y1="30" x2="23"  y2="26"/>
+    <line x1="77"  y1="30" x2="81"  y2="26"/>
+    <line x1="27"  y1="80" x2="23"  y2="84"/>
+    <line x1="77"  y1="80" x2="81"  y2="84"/>
+  </g>
+
+  <!-- core -->
+  <circle cx="52" cy="55" r="8"   fill="#0F6E56" opacity="0.95"/>
+  <circle cx="52" cy="55" r="4.5" fill="#E1F5EE" opacity="0.95"/>
+  <circle cx="52" cy="55" r="1.8" fill="#0F6E56"/>
+
+  <!-- PETAL wordmark -->
+  <text x="116" y="50"
+        font-family="'Courier New', Courier, monospace"
+        font-size="46" font-weight="700"
+        letter-spacing="8"
+        fill="#04342C">PETAL</text>
+
+  <!-- divider -->
+  <line x1="116" y1="62" x2="572" y2="62" stroke="#5DCAA5" stroke-width="0.5" opacity="0.6"/>
+
+  <!-- subtitle -->
+  <text x="117" y="76"
+        font-family="'Courier New', Courier, monospace"
+        font-size="10" font-weight="400"
+        letter-spacing="1.4"
+        fill="#0F6E56">Phonon &amp; Electronics Triggering and Acquisition Layer</text>
+
+  <!-- divider 2 -->
+  <line x1="116" y1="86" x2="572" y2="86" stroke="#5DCAA5" stroke-width="0.5" opacity="0.3"/>
+
+  <!-- tagline -->
+  <text x="117" y="99"
+        font-family="'Courier New', Courier, monospace"
+        font-size="10" font-weight="400"
+        letter-spacing="2.2"
+        fill="#1D9E75">LOTUSS Experiment  ·  Kamioka</text>
+
+</svg>
