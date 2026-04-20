@@ -194,6 +194,28 @@ cd ~/stem
 pip install -r requirements.txt
 ```
 
+### Configuration
+Before running STEM, create a `config.ini` file in the stem directory:
+
+```bash
+# Copy the example configuration
+cp config.ini.example config.ini
+
+# Edit config.ini with your DAQ machine address
+# For local development (DAQ on same machine):
+#   daq_host = localhost
+#
+# For LAN deployment (DAQ on different machine):
+#   daq_host = 192.168.1.100  (replace with your DAQ machine IP)
+```
+
+**Key configuration options:**
+- `[zmq] daq_host` — IP address or hostname of the machine running fake_data
+- `[zmq] sub_port` — Port for receiving data from DAQ (default: 5555)
+- `[zmq] pub_port` — Port for sending control commands to DAQ (default: 5556)
+- `[web] host` — Web server binding (0.0.0.0 = all interfaces, 127.0.0.1 = localhost only)
+- `[web] port` — Web server port (default: 8000)
+
 ### Start Server
 ```bash
 # Development (with auto-reload)
